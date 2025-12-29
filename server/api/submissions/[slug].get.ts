@@ -5,7 +5,6 @@ export default defineEventHandler(async (event) => {
   const user = await requireAuth(event)
   const slug = getRouterParam(event, 'slug')
   
-  // Verify form belongs to user
   const formsCollection = await collections.forms()
   const form = await formsCollection.findOne({ slug, userId: user.id })
   
@@ -19,5 +18,8 @@ export default defineEventHandler(async (event) => {
   const submissionsCollection = await collections.submissions()
   const submissions = await submissionsCollection.find({ formSlug: slug }).sort({ createdAt: -1 }).toArray()
   
-  return submissions
+  return submissions.map(sub => {
+    const { _id, ...submission } = sub
+    return submission
+  })
 })

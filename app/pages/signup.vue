@@ -38,7 +38,6 @@ async function handleVerify() {
       body: { email: email.value, otp: otp.value }
     })
     success.value = 'Account created successfully! Redirecting...'
-    // Refresh auth state
     await checkAuth()
     setTimeout(async () => {
       await navigateTo('/forms')

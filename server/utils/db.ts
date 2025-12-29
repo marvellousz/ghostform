@@ -14,19 +14,13 @@ export async function connectDB(): Promise<Db> {
   }
 
   try {
-    // Extract database name from URI
-    // URI format: mongodb+srv://user:pass@host/dbname?options
-    // Find the part after the last '/' before '?'
     const match = uri.match(/mongodb\+srv:\/\/[^/]+\/([^?]+)/)
-    let dbName = 'ghostform' // default
+    let dbName = 'ghostform'
     
     if (match && match[1]) {
-      dbName = match[1].trim()
-      // Remove trailing slash if present
-      dbName = dbName.replace(/\/$/, '')
+      dbName = match[1].trim().replace(/\/$/, '')
     }
     
-    // Ensure dbName is not empty
     if (!dbName) {
       dbName = 'ghostform'
     }
@@ -46,7 +40,6 @@ export async function getCollection(name: string) {
   return database.collection(name)
 }
 
-// Collections
 export const collections = {
   users: () => getCollection('users'),
   forms: () => getCollection('forms'),

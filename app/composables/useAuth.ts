@@ -1,5 +1,4 @@
 export const useAuth = () => {
-  // Shared state - must be inside the function to be called in setup context
   const user = useState<any>('auth.user', () => null)
   const loading = useState<boolean>('auth.loading', () => true)
 
@@ -27,13 +26,16 @@ export const useAuth = () => {
     }
   }
 
-  // Check auth on mount (only once per page load)
   if (process.client) {
     const hasChecked = useState<boolean>('auth.checked', () => false)
     if (!hasChecked.value) {
       hasChecked.value = true
       checkAuth()
     }
+  }
+  
+  if (process.client && user.value && loading.value) {
+    loading.value = false
   }
 
   return {

@@ -17,9 +17,22 @@ useHead({
 const showProfileMenu = ref(false)
 const showDeleteConfirm = ref(false)
 
+watch(() => route.path, () => {
+  showProfileMenu.value = false
+})
+
 function handleLogout() {
   logout()
   showProfileMenu.value = false
+}
+
+const notification = ref({ show: false, message: '', type: 'success' as 'success' | 'error' })
+
+function showNotification(message: string, type: 'success' | 'error' = 'success') {
+  notification.value = { show: true, message, type }
+  setTimeout(() => {
+    notification.value.show = false
+  }, 3000)
 }
 
 async function handleDeleteAccount() {
@@ -29,15 +42,14 @@ async function handleDeleteAccount() {
     showProfileMenu.value = false
     await logout()
   } catch (error: any) {
-    alert(error.data?.message || 'Failed to delete account')
+    showNotification(error.data?.message || 'Failed to delete account', 'error')
   }
 }
 
-// Close profile menu when clicking outside
 onMounted(() => {
-  const handleClickOutside = (event) => {
-    const target = event.target
-    if (target && !target.closest) return
+  const handleClickOutside = (event: MouseEvent) => {
+    const target = event.target as HTMLElement | null
+    if (!target || !target.closest) return
     if (!target.closest('.profile-menu')) {
       showProfileMenu.value = false
     }
@@ -54,15 +66,15 @@ onMounted(() => {
     <NuxtRouteAnnouncer />
     
     <!-- Navigation -->
-    <nav v-if="!isAuthPage" class="navbar">
+    <nav v-if="!isAuthPage" class="navbar" key="main-navbar">
       <div class="container">
         <div class="nav-content">
           <NuxtLink to="/" class="logo">GhostForm</NuxtLink>
           
           <div class="nav-links-center">
-            <NuxtLink v-if="!authLoading && isAuthenticated" to="/forms">My Forms</NuxtLink>
-            <NuxtLink to="/#features">Features</NuxtLink>
-            <a href="#docs">Documentation</a>
+            <NuxtLink v-if="!authLoading && isAuthenticated" to="/forms" @click="showProfileMenu = false">My Forms</NuxtLink>
+            <NuxtLink to="/#features" @click="showProfileMenu = false">Features</NuxtLink>
+            <a href="#docs" @click="showProfileMenu = false">Documentation</a>
           </div>
           
           <div class="nav-links-right">
@@ -132,6 +144,21 @@ onMounted(() => {
     
     <!-- Page Content -->
     <NuxtPage />
+    
+    <div v-if="notification.show" class="notification-overlay" @click="notification.show = false">
+      <div class="notification-modal" :class="notification.type" @click.stop>
+        <div class="notification-icon">
+          <svg v-if="notification.type === 'success'" width="24" height="24" viewBox="0 0 24 24" fill="none">
+            <path d="M20 6L9 17L4 12" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+          <svg v-else width="24" height="24" viewBox="0 0 24 24" fill="none">
+            <path d="M18 6L6 18M6 6L18 18" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+        </div>
+        <p class="notification-message">{{ notification.message }}</p>
+        <button @click="notification.show = false" class="notification-close">OK</button>
+      </div>
+    </div>
   </div>
 </template>
 
@@ -213,6 +240,9 @@ body {
   -webkit-backdrop-filter: blur(12px);
   border-bottom: 1px solid var(--nav-border);
   padding: 16px 0;
+  will-change: auto;
+  transform: translateZ(0);
+  -webkit-transform: translateZ(0);
 }
 
 .nav-content {
@@ -626,6 +656,111 @@ body {
 @media (max-width: 1200px) {
   .profile-email {
     max-width: 120px;
+  }
+}
+
+.notification-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.6);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 10000;
+  padding: 20px;
+  animation: fadeIn 0.2s ease-out;
+}
+
+.notification-modal {
+  background: var(--card-bg);
+  border: 1px solid var(--border-color);
+  border-radius: 16px;
+  padding: 32px;
+  max-width: 400px;
+  width: 100%;
+  box-shadow: var(--shadow-lg);
+  text-align: center;
+  animation: slideUp 0.3s ease-out;
+}
+
+.notification-modal.success {
+  border-color: #22c55e;
+}
+
+.notification-modal.error {
+  border-color: #ef4444;
+}
+
+.notification-icon {
+  width: 64px;
+  height: 64px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0 auto 20px;
+  background: rgba(139, 92, 246, 0.1);
+  color: var(--accent-color);
+}
+
+.notification-modal.success .notification-icon {
+  background: rgba(34, 197, 94, 0.1);
+  color: #22c55e;
+}
+
+.notification-modal.error .notification-icon {
+  background: rgba(239, 68, 68, 0.1);
+  color: #ef4444;
+}
+
+.notification-message {
+  font-size: 16px;
+  font-weight: 500;
+  color: var(--text-color);
+  margin-bottom: 24px;
+  line-height: 1.5;
+}
+
+.notification-close {
+  background: linear-gradient(135deg, #8b5cf6, #7c3aed);
+  color: white;
+  border: none;
+  padding: 12px 32px;
+  border-radius: 8px;
+  font-weight: 600;
+  font-size: 15px;
+  cursor: pointer;
+  transition: all 0.2s;
+  box-shadow: 0 4px 14px 0 rgba(139, 92, 246, 0.4);
+}
+
+.notification-close:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 6px 20px 0 rgba(139, 92, 246, 0.5);
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes slideUp {
+  from {
+    transform: translateY(20px);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
   }
 }
 </style>

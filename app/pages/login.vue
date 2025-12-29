@@ -14,7 +14,6 @@ async function handleLogin() {
       method: 'POST',
       body: { email: email.value, password: password.value }
     })
-    // Refresh auth state
     await checkAuth()
     await navigateTo('/forms')
   } catch (err: any) {

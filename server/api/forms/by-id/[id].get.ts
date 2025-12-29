@@ -14,7 +14,6 @@ export default defineEventHandler(async (event) => {
     })
   }
 
-  // Check if form belongs to user
   if (form.userId !== user.id) {
     throw createError({
       statusCode: 403,

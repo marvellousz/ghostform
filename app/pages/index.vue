@@ -67,6 +67,10 @@ async function handleCreateForm() {
             <h3>Simple Embedding</h3>
             <p>Standard HTML form action URLs. No JavaScript required.</p>
           </div>
+          <div class="feature-item">
+            <h3>Rate Limiting</h3>
+            <p>Protect your forms from spam and abuse with configurable rate limits per form.</p>
+          </div>
         </div>
       </div>
     </section>
@@ -118,6 +122,14 @@ async function handleCreateForm() {
             <h3>JSON Export</h3>
             <p>Export all submissions as JSON.</p>
           </div>
+          <div class="dev-feature">
+            <h3>RESTful API</h3>
+            <p>Full REST API access for programmatic form management.</p>
+          </div>
+          <div class="dev-feature">
+            <h3>Custom Validation</h3>
+            <p>Server-side validation rules with custom error messages.</p>
+          </div>
         </div>
       </div>
     </section>
@@ -143,6 +155,14 @@ async function handleCreateForm() {
           <div class="privacy-feature">
             <h3>Encrypted at rest</h3>
             <p>All submissions are encrypted.</p>
+          </div>
+          <div class="privacy-feature">
+            <h3>Data ownership</h3>
+            <p>You own all your data. Export or delete anytime.</p>
+          </div>
+          <div class="privacy-feature">
+            <h3>Open source</h3>
+            <p>Transparent codebase. Audit and verify our privacy claims.</p>
           </div>
         </div>
       </div>
@@ -339,7 +359,7 @@ section {
 /* Features */
 .features-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+  grid-template-columns: repeat(3, 1fr);
   gap: 32px;
 }
 
@@ -427,7 +447,7 @@ section {
 /* Developer Experience */
 .dev-features {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  grid-template-columns: repeat(3, 1fr);
   gap: 32px;
 }
 
@@ -466,7 +486,7 @@ section {
 
 .privacy-features {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  grid-template-columns: repeat(3, 1fr);
   gap: 32px;
 }
 

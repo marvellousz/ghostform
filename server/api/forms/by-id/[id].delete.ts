@@ -4,7 +4,6 @@ import { requireAuth } from '../../../utils/auth'
 export default defineEventHandler(async (event) => {
   const user = await requireAuth(event)
   const id = getRouterParam(event, 'id')
-  const body = await readBody(event)
   
   const formsCollection = await collections.forms()
   const form = await formsCollection.findOne({ id })
@@ -19,24 +18,16 @@ export default defineEventHandler(async (event) => {
   if (form.userId !== user.id) {
     throw createError({
       statusCode: 403,
-      message: 'You do not have permission to edit this form'
+      message: 'You do not have permission to delete this form'
     })
   }
 
-  await formsCollection.updateOne(
-    { id },
-    {
-      $set: {
-        name: body.name,
-        slug: body.slug,
-        fields: body.fields,
-        settings: body.settings,
-        userId: user.id,
-        updatedAt: new Date()
-      }
-    }
-  )
-
-  const updatedForm = await formsCollection.findOne({ id })
-  return updatedForm
+  const submissionsCollection = await collections.submissions()
+  await submissionsCollection.deleteMany({ formId: id })
+  await formsCollection.deleteOne({ id })
+  
+  return {
+    success: true,
+    message: 'Form deleted successfully'
+  }
 })

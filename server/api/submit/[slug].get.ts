@@ -8,7 +8,6 @@ async function ensureDataDir() {
   try {
     await mkdir(DATA_DIR, { recursive: true })
   } catch (error) {
-    // Directory might already exist
   }
 }
 

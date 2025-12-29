@@ -1,12 +1,10 @@
 import { collections } from '../../utils/db'
 
 function validateField(field: any, value: any): string | null {
-  // Required validation
   if (field.required && (!value || value.trim() === '')) {
     return field.errorMessage || `${field.label || 'This field'} is required`
   }
 
-  // Email validation
   if (field.type === 'email' && value && field.validation?.email !== false) {
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
     if (!emailRegex.test(value)) {
@@ -14,17 +12,14 @@ function validateField(field: any, value: any): string | null {
     }
   }
 
-  // Min length validation
   if (field.validation?.minLength && value && value.length < field.validation.minLength) {
     return field.errorMessage || `${field.label || 'This field'} must be at least ${field.validation.minLength} characters`
   }
 
-  // Max length validation
   if (field.validation?.maxLength && value && value.length > field.validation.maxLength) {
     return field.errorMessage || `${field.label || 'This field'} must be no more than ${field.validation.maxLength} characters`
   }
 
-  // Number min/max validation
   if (field.type === 'number' && value) {
     const num = Number(value)
     if (field.validation?.min !== undefined && num < field.validation.min) {
@@ -53,11 +48,11 @@ export default defineEventHandler(async (event) => {
   if (!form.settings.enabled) {
     throw createError({
       statusCode: 403,
-      message: 'Form is disabled'
+      statusMessage: 'Form Disabled',
+      message: 'This form is currently disabled and not accepting submissions. Please contact the form owner if you believe this is an error.'
     })
   }
 
-  // Rate limiting check (simple implementation)
   if (form.settings.rateLimit) {
     const submissionsCollection = await collections.submissions()
     const oneHourAgo = new Date(Date.now() - 60 * 60 * 1000)
@@ -74,7 +69,6 @@ export default defineEventHandler(async (event) => {
     }
   }
 
-  // Parse body - handle both JSON and form-urlencoded
   let body: any
   const contentType = getHeader(event, 'content-type') || ''
   
@@ -93,7 +87,6 @@ export default defineEventHandler(async (event) => {
   
   const errors: Record<string, string> = {}
 
-  // Validate all fields
   for (const field of form.fields) {
     const value = body[field.id]
     const error = validateField(field, value)
@@ -110,7 +103,6 @@ export default defineEventHandler(async (event) => {
     })
   }
 
-  // Save submission
   const submissionsCollection = await collections.submissions()
   const submission = {
     id: crypto.randomUUID(),
@@ -122,16 +114,13 @@ export default defineEventHandler(async (event) => {
   
   await submissionsCollection.insertOne(submission)
 
-  // Check if this is a form submission (not JSON API call)
   const isFormSubmission = contentType.includes('application/x-www-form-urlencoded')
 
   if (isFormSubmission && form.settings.redirectUrl) {
-    // Redirect for HTML form submissions
     return sendRedirect(event, form.settings.redirectUrl)
   }
 
   if (isFormSubmission) {
-    // Return HTML success page for form submissions
     const html = `
       <!DOCTYPE html>
       <html>
@@ -174,7 +163,6 @@ export default defineEventHandler(async (event) => {
     return html
   }
 
-  // Return JSON response for API calls
   return {
     success: true,
     message: form.settings.successMessage || 'Thank you for your submission!',

@@ -6,7 +6,6 @@ export async function getSessionData(sessionId: string) {
   
   if (!session) return null
   
-  // Check expiration
   if (new Date(session.expiresAt) < new Date()) {
     await sessionsCollection.deleteOne({ id: sessionId })
     return null

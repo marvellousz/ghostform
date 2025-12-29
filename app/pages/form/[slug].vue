@@ -7,11 +7,11 @@ const formData = ref({})
 const errors = ref({})
 const submitted = ref(false)
 const successMessage = ref('')
+const errorMessage = ref('')
 
 try {
   form.value = await $fetch(`/api/forms/${slug}`)
   
-  // Initialize form data with default values
   form.value.fields.forEach(field => {
     if (field.defaultValue) {
       formData.value[field.id] = field.defaultValue
@@ -24,28 +24,45 @@ try {
   })
 }
 
-async function submitForm() {
+async function submitForm(event: Event) {
   errors.value = {}
+  errorMessage.value = ''
+  
+  const formElement = event.target as HTMLFormElement
+  const formDataObj = new FormData(formElement)
+  const data: Record<string, any> = {}
+  
+  for (const [key, value] of formDataObj.entries()) {
+    if (formElement.querySelectorAll(`[name="${key}"]:checked`).length > 0) {
+      const checked = Array.from(formElement.querySelectorAll(`[name="${key}"]:checked`)) as HTMLInputElement[]
+      data[key] = checked.length === 1 ? checked[0].value : checked.map(c => c.value)
+    } else if (formElement.querySelector(`[name="${key}"]`)) {
+      const input = formElement.querySelector(`[name="${key}"]`) as HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement
+      data[key] = input.value
+    }
+  }
   
   try {
     const response = await $fetch(`/api/submit/${slug}`, {
       method: 'POST',
-      body: formData.value
+      body: data
     })
     
     submitted.value = true
     successMessage.value = response.message
+    errorMessage.value = ''
     
     if (response.redirectUrl) {
       setTimeout(() => {
         window.location.href = response.redirectUrl
       }, 2000)
     }
-  } catch (error) {
+  } catch (error: any) {
     if (error.data?.errors) {
       errors.value = error.data.errors
+      errorMessage.value = ''
     } else {
-      alert(error.message || 'An error occurred')
+      errorMessage.value = error.data?.message || error.message || 'An error occurred while submitting the form'
     }
   }
 }
@@ -172,6 +189,10 @@ function renderField(field) {
       
       <form v-else :action="`/api/submit/${slug}`" method="POST" @submit.prevent="submitForm" novalidate>
         <h1>{{ form.name }}</h1>
+        
+        <div v-if="errorMessage" class="error-message-global">
+          {{ errorMessage }}
+        </div>
         
         <div v-for="field in form.fields" :key="field.id" class="form-field">
           <label v-if="field.type !== 'checkbox' && field.type !== 'radio' && field.type !== 'hidden'" :for="`field-${field.id}`">
@@ -348,6 +369,30 @@ label {
   margin-top: 8px;
   color: #ef4444;
   font-size: 14px;
+}
+
+.error-message-global {
+  background: rgba(239, 68, 68, 0.1);
+  border: 2px solid #ef4444;
+  border-radius: 12px;
+  padding: 16px 20px;
+  margin-bottom: 24px;
+  color: #ef4444;
+  font-size: 15px;
+  font-weight: 500;
+  line-height: 1.5;
+}
+
+.error-message-global {
+  background: rgba(239, 68, 68, 0.1);
+  border: 2px solid #ef4444;
+  border-radius: 12px;
+  padding: 16px 20px;
+  margin-bottom: 24px;
+  color: #ef4444;
+  font-size: 15px;
+  font-weight: 500;
+  line-height: 1.5;
 }
 
 .success-message {
