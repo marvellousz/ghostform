@@ -33,6 +33,7 @@ onMounted(() => {
 
 useHead({
   link: [
+    { rel: 'icon', type: 'image/png', href: 'https://2lyfanvqy9.ufs.sh/f/ocSxC2zlR1ZudeifziJBwa5XY2FSC4HTUJ1qyMhjvOuA7rKo' },
     { rel: 'preconnect', href: 'https://fonts.googleapis.com' },
     { rel: 'preconnect', href: 'https://fonts.gstatic.com', crossorigin: '' },
     { rel: 'stylesheet', href: 'https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300..700&display=swap' }
@@ -99,7 +100,10 @@ onMounted(() => {
     <nav v-if="!isAuthPage" class="navbar" key="main-navbar">
       <div class="container">
         <div class="nav-content">
-          <NuxtLink to="/" class="logo" @click="showMobileMenu = false">GhostForm</NuxtLink>
+          <NuxtLink to="/" class="logo" @click="showMobileMenu = false">
+            <img src="https://2lyfanvqy9.ufs.sh/f/ocSxC2zlR1ZudeifziJBwa5XY2FSC4HTUJ1qyMhjvOuA7rKo" alt="GhostForm" class="logo-image" />
+            <span class="logo-text">GhostForm</span>
+          </NuxtLink>
           
           <div class="nav-links-center">
             <NuxtLink v-if="showAuthContent" to="/forms" @click="showProfileMenu = false; showMobileMenu = false">My Forms</NuxtLink>
@@ -404,15 +408,32 @@ body {
 }
 
 .logo {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  z-index: 101;
+  text-decoration: none;
+}
+
+.logo-image {
+  height: 32px;
+  width: auto;
+  object-fit: contain;
+}
+
+.logo-text {
   font-size: 20px;
   font-weight: 700;
   color: var(--text-color);
   letter-spacing: -0.02em;
-  z-index: 101;
 }
 
 @media (max-width: 480px) {
-  .logo {
+  .logo-image {
+    height: 28px;
+  }
+  
+  .logo-text {
     font-size: 18px;
   }
 }

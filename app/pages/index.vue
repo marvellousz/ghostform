@@ -173,7 +173,10 @@ async function handleCreateForm() {
       <div class="container">
         <div class="footer-content">
           <div class="footer-brand">
-            <div class="logo">GhostForm</div>
+            <div class="footer-logo-container">
+              <img src="https://2lyfanvqy9.ufs.sh/f/ocSxC2zlR1ZudeifziJBwa5XY2FSC4HTUJ1qyMhjvOuA7rKo" alt="GhostForm" class="logo-image" />
+              <span class="logo-text">GhostForm</span>
+            </div>
             <p class="footer-tagline">Privacy-first form builder</p>
           </div>
           <div class="footer-links">
@@ -531,8 +534,24 @@ section {
   max-width: 300px;
 }
 
-.footer-brand .logo {
+.footer-logo-container {
+  display: flex;
+  align-items: center;
+  gap: 12px;
   margin-bottom: 16px;
+}
+
+.footer-logo-container .logo-image {
+  height: 40px;
+  width: auto;
+  object-fit: contain;
+}
+
+.footer-logo-container .logo-text {
+  font-size: 24px;
+  font-weight: 700;
+  color: var(--text-color);
+  letter-spacing: -0.02em;
 }
 
 .footer-tagline {
