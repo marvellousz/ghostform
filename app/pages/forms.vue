@@ -196,7 +196,6 @@ async function handleDeleteForm() {
         </div>
         <h2>No forms yet</h2>
         <p>Create your first secure form and start collecting data today.</p>
-        <NuxtLink to="/builder" class="btn btn-primary">Get Started</NuxtLink>
       </div>
 
       <div v-else class="forms-grid">
@@ -390,7 +389,7 @@ async function handleDeleteForm() {
 
 .empty-state p {
   color: #6b6b80;
-  margin-bottom: 32px;
+  margin-bottom: 0;
 }
 
 /* ─── Forms Grid ───────────────────────────────────────────── */

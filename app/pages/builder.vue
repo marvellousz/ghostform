@@ -64,6 +64,7 @@ const fieldTypes = [
   { value: 'select', label: 'Dropdown Select' },
   { value: 'checkbox', label: 'Checkbox' },
   { value: 'radio', label: 'Radio Selection' },
+  { value: 'checkboxes', label: 'Multiple Choice (checkboxes)' },
   { value: 'hidden', label: 'Hidden Field' }
 ]
 
@@ -311,7 +312,7 @@ async function saveForm() {
                 </div>
 
                 <!-- Type Specific -->
-                <div v-if="field.type === 'select' || field.type === 'radio'" class="field-group">
+                <div v-if="field.type === 'select' || field.type === 'radio' || field.type === 'checkboxes'" class="field-group">
                   <label>Options (One per line)</label>
                   <textarea 
                     :value="getOptionsText(field)"

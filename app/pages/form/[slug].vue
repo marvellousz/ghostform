@@ -39,19 +39,21 @@ async function submitForm(event: Event) {
   if (form.value && form.value.fields) {
     for (const field of form.value.fields) {
       const fieldName = field.id
-      
-      const radioInputs = formElement.querySelectorAll(`input[name="${fieldName}"][type="radio"]`)
-      const checkboxInputs = formElement.querySelectorAll(`input[name="${fieldName}"][type="checkbox"]`)
-      
-      if (radioInputs.length > 0) {
-        const checked = Array.from(radioInputs).find((input: HTMLInputElement) => input.checked) as HTMLInputElement | undefined
-        if (checked) {
-          data[fieldName] = checked.value
+
+      if (field.type === 'checkboxes') {
+        const multi = formElement.querySelectorAll(`input[name="${fieldName}"][type="checkbox"]`)
+        const checked = Array.from(multi).filter((input: HTMLInputElement) => input.checked)
+        data[fieldName] = checked.map(c => c.value)
+      } else if (field.type === 'radio') {
+        const radioInputs = formElement.querySelectorAll(`input[name="${fieldName}"][type="radio"]`)
+        const picked = Array.from(radioInputs).find((input: HTMLInputElement) => input.checked) as HTMLInputElement | undefined
+        if (picked) {
+          data[fieldName] = picked.value
         }
-      } else if (checkboxInputs.length > 0) {
-        const checked = Array.from(checkboxInputs).filter((input: HTMLInputElement) => input.checked) as HTMLInputElement[]
-        if (checked.length > 0) {
-          data[fieldName] = checked.length === 1 ? checked[0].value : checked.map(c => c.value)
+      } else if (field.type === 'checkbox') {
+        const single = formElement.querySelector(`input[name="${fieldName}"][type="checkbox"]`) as HTMLInputElement | null
+        if (single?.checked) {
+          data[fieldName] = single.value
         }
       } else if (field.type === 'hidden') {
         const input = formElement.querySelector(`input[name="${fieldName}"][type="hidden"]`) as HTMLInputElement | null
@@ -147,6 +149,24 @@ function renderField(field) {
         class="${hasError ? 'error' : ''}"
       /> <span class="checkbox-text">${field.label}</span></label>`
       break
+
+    case 'checkboxes': {
+      const preChecked = typeof field.defaultValue === 'string' && field.defaultValue
+        ? field.defaultValue.split(',').map((s: string) => s.trim()).filter(Boolean)
+        : []
+      const multiBoxes = field.options?.map((opt: string, idx: number) =>
+        `<label class="checkbox-wrapper"><input 
+          type="checkbox" 
+          id="${fieldId}-${idx}" 
+          name="${field.id}" 
+          value="${opt}"
+          ${preChecked.includes(opt) ? 'checked' : ''}
+          class="${hasError ? 'error' : ''}"
+        /> <span class="checkbox-text">${opt}</span></label>`
+      ).join('') || ''
+      fieldHtml = `<div class="checkbox-group">${multiBoxes}</div>`
+      break
+    }
       
     case 'radio':
       const radioOptions = field.options?.map((opt, idx) => 
@@ -249,12 +269,16 @@ function renderField(field) {
         
         <div class="fields-container">
           <div v-for="field in form.fields" :key="field.id" class="form-field-item">
-            <label v-if="field.type !== 'checkbox' && field.type !== 'radio' && field.type !== 'hidden'" :for="`field-${field.id}`" class="field-label">
+            <label v-if="field.type !== 'checkbox' && field.type !== 'radio' && field.type !== 'checkboxes' && field.type !== 'hidden'" :for="`field-${field.id}`" class="field-label">
               {{ field.label }}
               <span v-if="field.required" class="required-mark">*</span>
             </label>
-            
-            <div v-html="renderField(field)" class="field-rendering"></div>
+            <div v-else-if="field.type === 'radio' || field.type === 'checkboxes'" class="field-label" :id="`field-${field.id}-legend`">
+              {{ field.label }}
+              <span v-if="field.required" class="required-mark">*</span>
+            </div>
+
+            <div v-html="renderField(field)" class="field-rendering" :role="field.type === 'radio' || field.type === 'checkboxes' ? 'group' : undefined" :aria-labelledby="field.type === 'radio' || field.type === 'checkboxes' ? `field-${field.id}-legend` : undefined"></div>
             
             <div v-if="field.description" class="field-hint" v-html="field.description"></div>
             
@@ -389,7 +413,8 @@ function renderField(field) {
   border-color: #ef4444;
 }
 
-.radio-group {
+.radio-group,
+.checkbox-group {
   display: flex;
   flex-direction: column;
   gap: 12px;

@@ -23,7 +23,8 @@ pnpm install
 2. Set up environment variables:
 
 ```bash
-MONGODB_URI=your_mongodb_connection_string
+MONGODB_URI=mongodb+srv://user:pass@cluster.mongodb.net/ghostform?retryWrites=true&w=majority
+MONGODB_DB_NAME=ghostform
 RESEND_API_KEY=your_resend_api_key
 RESEND_FROM_EMAIL="Marvlock <noreply@marvlock.dev>"
 ```

@@ -51,6 +51,23 @@ function renderFieldHTML(field: any): string {
       ).join('') || ''
       fieldHtml = radioOptions
       break
+
+    case 'checkboxes': {
+      const pre = typeof field.defaultValue === 'string' && field.defaultValue
+        ? field.defaultValue.split(',').map((s: string) => s.trim()).filter(Boolean)
+        : []
+      const multiOpts = field.options?.map((opt: string, idx: number) =>
+        `<label><input 
+          type="checkbox" 
+          id="${fieldId}-${idx}" 
+          name="${field.id}" 
+          value="${opt}"
+          ${pre.includes(opt) ? 'checked' : ''}
+        /> ${opt}</label>`
+      ).join('') || ''
+      fieldHtml = multiOpts
+      break
+    }
       
     case 'hidden':
       fieldHtml = `<input 
@@ -131,10 +148,17 @@ export default defineEventHandler(async (event) => {
 
   const fieldsHTML = form.fields.map((field: any) => {
     const fieldId = `field-${field.id}`
-    const fieldHTML = renderFieldHTML(field)
-    const labelHTML = field.type !== 'checkbox' && field.type !== 'radio' && field.type !== 'hidden'
-      ? `<label class="ghostform-label" for="${fieldId}">${field.label || ''}${field.required ? ' <span class="ghostform-required">*</span>' : ''}</label>`
-      : ''
+    const fieldHTMLRaw = renderFieldHTML(field)
+    const fieldHTML =
+      field.type === 'radio' || field.type === 'checkboxes'
+        ? `<div role="group" aria-labelledby="${fieldId}-legend">${fieldHTMLRaw}</div>`
+        : fieldHTMLRaw
+    const labelHTML =
+      field.type === 'hidden' || field.type === 'checkbox'
+        ? ''
+        : field.type === 'radio' || field.type === 'checkboxes'
+          ? `<div class="ghostform-label" id="${fieldId}-legend">${field.label || ''}${field.required ? ' <span class="ghostform-required">*</span>' : ''}</div>`
+          : `<label class="ghostform-label" for="${fieldId}">${field.label || ''}${field.required ? ' <span class="ghostform-required">*</span>' : ''}</label>`
     const descriptionHTML = field.description ? `<div class="ghostform-description">${field.description}</div>` : ''
     
     return `

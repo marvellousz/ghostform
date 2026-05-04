@@ -55,6 +55,14 @@ function validateField(field: any, value: any): string | null {
     return field.errorMessage || `${field.label || 'This field'} must be no more than ${field.validation.maxLength} characters`
   }
 
+  if (field.type === 'checkboxes' && Array.isArray(value) && value.length > 0 && field.options?.length) {
+    for (const v of value) {
+      if (typeof v === 'string' && !field.options.includes(v)) {
+        return field.errorMessage || `${field.label || 'This field'} has an invalid selection`
+      }
+    }
+  }
+
   if (field.type === 'number' && value) {
     const num = Number(value)
     if (isNaN(num)) {
@@ -191,11 +199,32 @@ export default defineEventHandler(async (event) => {
     if (rawBody) {
       const params = new URLSearchParams(rawBody.toString())
       params.forEach((value, key) => {
-        body[key] = value
+        if (body[key] === undefined) {
+          body[key] = value
+        } else if (Array.isArray(body[key])) {
+          body[key].push(value)
+        } else {
+          body[key] = [body[key], value]
+        }
       })
     }
   } else {
     body = await readBody(event)
+  }
+
+  for (const field of form.fields) {
+    if (field.type === 'checkboxes') {
+      const v = body[field.id]
+      if (v === undefined || v === null) {
+        body[field.id] = []
+      } else if (Array.isArray(v)) {
+        body[field.id] = v.filter((x: unknown) => x !== undefined && x !== null && String(x).trim() !== '')
+      } else if (typeof v === 'string') {
+        body[field.id] = v.trim() ? [v] : []
+      } else {
+        body[field.id] = []
+      }
+    }
   }
   
   const errors: Record<string, string> = {}

@@ -3,7 +3,7 @@ import { requireAuth } from '../../utils/auth'
 
 interface FormField {
   id: string
-  type: 'text' | 'email' | 'number' | 'textarea' | 'select' | 'checkbox' | 'radio' | 'hidden'
+  type: 'text' | 'email' | 'number' | 'textarea' | 'select' | 'checkbox' | 'checkboxes' | 'radio' | 'hidden'
   label?: string
   placeholder?: string
   required: boolean
@@ -17,7 +17,7 @@ interface FormField {
     max?: number
   }
   errorMessage?: string
-  options?: string[] // For select and radio
+  options?: string[] // For select, radio, and checkboxes
 }
 
 interface Form {
